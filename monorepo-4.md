@@ -66,7 +66,7 @@ Beberapa script **ditambahkan/dimodifikasi** untuk fungsi build vercel & seed da
    - Turso: 
      - generate file `baseline.sql` (skema) -> masukkan ke database turso.
      - Seeding data tabel user ke database turso.
-     - Test dengan run `bun prod:start`
+     - Test dengan run `bun dev:turso`
 ```json
 {
   "scripts": {
@@ -197,8 +197,8 @@ Beberapa modifikasi:
 - Console log dynamic mengikuti variabel & tidak tampil di production.
 - export default app untuk Elysia dibaca oleh Vercel.
 
-### 7. **.env.**, **.env.development**, **.env.production**
-Buat env utama dan env terpisah untuk development & production:
+### 7. **.env.**, **.env.development**
+Buat env utama dan env terpisah untuk development:
 - `.env` (Ada setingan google, asumsi monorepo-3 selesai)
 ```bash
 GOOGLE_CLIENT_ID=
@@ -216,18 +216,11 @@ Gunakan `API_KEY="learn"` untuk default, agar asdos mudah menilai.
 DATABASE_URL="file:./dev.db"
 ```
 
-- `env.production`
-```bash
-DATABASE_URL=libsql://monorepo-<username>.aws-ap-northeast-1.turso.io
-DB_AUTH_TOKEN=eyJhbGciOiJFZERTQSxxxxx
-```
-
 > 🚨 Jangan lupa tambahkan file env tersebut ke `.gitignore`
 
 ### 7. Test backend Build
 Untuk memeriksa apakah koneksi turso backend & build (untuk vercel) berhasil:
 ```bash
-bun dev:turso # Cek koneksi development server dengan turso database. Jika `/users` maka berhasil.
 bun run build # jalankan build ke output
 bun start # cek hasil build di dist/index.mjs. periksa path `/users`, dan debug-prisma (jika file ada maka berhasil) 
 ```
@@ -241,7 +234,7 @@ error: Cannot find module './generated/prisma/client' from 'C:\repo\ppwl\apps\ba
 Solusinya:
 - hapus folder `apps/backend/node_modules/.prisma` (jika ada)
 - hapus juga file `bun.lock`
-- jalankan `bun install` di root. lalu jika berhasil ikuti seperti ini:
+- jalankan `bun install` di root. lalu ikuti seperti ini:
 ```bash
 >cd apps/backend
 
@@ -252,7 +245,7 @@ Loaded Prisma config from prisma.config.ts.
 Prisma schema loaded from prisma\schema.prisma.
 
 ✔ Generated Prisma Client (7.5.0) to .\src\generated\prisma in 133ms
-# kode lainnya
+# ...status success lainnya
 ✔ Build complete in 185ms
 
 >\apps\backend>bun start
@@ -261,6 +254,9 @@ $ bun dist/index.mjs
 🦊 TEST_URL: *
 🦊 DATABASE_URL: file:./dev.db
 ```
+kondisi berhasil: `.\src\generated\prisma` berhasil di generate, `bun start` berhasil jalan.
+
+---
 
 ## Apps/Frontend
 Ada beberapa setingan di local yang perlu dibuat/ubah:
