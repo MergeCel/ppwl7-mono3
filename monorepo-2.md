@@ -71,15 +71,15 @@ model User {
 bunx --bun prisma migrate dev --name init
 bunx --bun prisma generate # generate the Prisma Client backend/src/prisma/generate
 ```
-Jika gagal load DATABASE_URL. ganti fungsi env bawaan prisma ke process.env node.
+Jika gagal load DATABASE_URL. ganti fungsi env bawaan prisma ke `process.env` Node.
 di `apps\backend\prisma.config.ts`:
 ```ts
 import { defineConfig, env } from "prisma/config";
-// jadi ⬇️
+// ubah jadi ⬇️
 import { defineConfig } from "prisma/config";
 // -----------------
     url: env("DATABASE_URL"),
-// jadi ⬇️
+// ubah jadi ⬇️
     url: process.env.DATABASE_URL || "file:./dev.db",
 ``` 
 
