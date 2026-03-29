@@ -156,7 +156,6 @@ const app = new Elysia()
     }
 
     const { courseId } = params;
-
     const [courseWorks, submissions] = await Promise.all([
       getCourseWorks(tokens.access_token, courseId),
       getSubmissions(tokens.access_token, courseId),
@@ -187,5 +186,4 @@ if (process.env.NODE_ENV != "production") {
   console.log(`🦊 GOOGLE_REDIRECT_URI: ${process.env.GOOGLE_REDIRECT_URI}`); // dari file .env
 }
 
-// !!! tambahkan export app agar Elysia dapat dibaca Vercel serverless.
 export default app;
