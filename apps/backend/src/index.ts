@@ -28,7 +28,7 @@ const isBrowserRequest = (request: Request): boolean => {
 
 const app = new Elysia()
   // !!! modifikasi cors() dan onRequest
-  .use(cors({origin: process.env.TEST_URL === "*" ? true:(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])}))
+  .use(cors({origin: process.env.TEST_URL === "*" ? true:process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [], credentials: true, allowedHeaders: ["Content-Type", "Authorization"]}))
   .use(cookie())
   .use(swagger())
   .onRequest(({ request, set }) => {
@@ -37,21 +37,17 @@ const app = new Elysia()
     if (url.pathname.startsWith("/users")) {
       const origin = request.headers.get("origin");
       const frontendUrl = process.env.FRONTEND_URL ?? "";
+      const key = url.searchParams.get("key");
 
       // Jika request dari FRONTEND_URL → langsung izinkan
-      if (origin && origin === frontendUrl) return;
+      if (origin === frontendUrl) return;
 
-      // Jika akses dari browser langsung → wajib ada ?key=
-      if (isBrowserRequest(request)) {
-        const key = url.searchParams.get("key");
-
-        if (!key || key !== process.env.API_KEY) {
-          set.status = 401;
-          return { message: "Unauthorized: missing or invalid key" };
-        }
+      if (!key || key !== process.env.API_KEY) {
+        set.status = 401;
+        return { message: "Unauthorized: Access denied without valid API Key" };
       }
-    }
-  })
+      }
+    })
 
       // Health check
   .get("/", (): ApiResponse<HealthCheck> => ({
@@ -101,6 +97,12 @@ const app = new Elysia()
     // Set cookie session
     session.value = sessionId;
     session.maxAge = 60 * 60 * 24; // 1 hari
+    session.path = "/";
+
+    // !!! KONFIGURASI PRODUCTION UNTUK HTTPS
+    session.httpOnly = true;
+    session.secure = true;     // WAJIB: Cookie hanya dikirim lewat HTTPS
+    session.sameSite = "none"; // WAJIB: Agar cookie bisa dikirim antar domain berbeda
 
     // Redirect ke frontend
     return redirect(`${process.env.FRONTEND_URL}/classroom`);
@@ -170,18 +172,6 @@ const app = new Elysia()
 
     return { data: result, message: "Course submissions retrieved" };
   })
-
-  // !!! tambahakan Endpoint test prisma client Elysia atau function utama (sering bermasalah)
-  .get("/debug-prisma", () => {
-    const generatedPath = path.resolve(__dirname, "../src/generated/prisma/client");
-    const exists = fs.existsSync(generatedPath);
-
-    return {
-      path: generatedPath,
-      exists: exists,
-      files: exists ? fs.readdirSync(generatedPath) : []
-    };
-  });
   // !!! hapus bagian .listen(3000);
 
 // !!! hapus console log "yang terbuka" ini:
@@ -192,8 +182,9 @@ const app = new Elysia()
 if (process.env.NODE_ENV != "production") {
   app.listen(3000);
   console.log(`🦊 Backend → http://localhost:3000`);
-  console.log(`🦊 TEST_URL: ${process.env.TEST_URL}`);
-  console.log(`🦊 DATABASE_URL: ${process.env.DATABASE_URL}`);
+  console.log(`🦊 FRONTEND_URL → ${process.env.FRONTEND_URL}`); // pembeda .env.development & .env.production
+  console.log(`🦊 DATABASE_URL: ${process.env.DATABASE_URL}`); // pembeda development & production
+  console.log(`🦊 GOOGLE_REDIRECT_URI: ${process.env.GOOGLE_REDIRECT_URI}`); // dari file .env
 }
 
 // !!! tambahkan export app agar Elysia dapat dibaca Vercel serverless.

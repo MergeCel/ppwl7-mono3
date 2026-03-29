@@ -13,7 +13,4 @@ for (const statement of statements) {
   await prisma.$executeRawUnsafe(statement);
 }
 
-console.log(process.env.DATABASE_URL);
-console.log(process.env.AUTH_TOKEN);
-
 await prisma.$disconnect();
