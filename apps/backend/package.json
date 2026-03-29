@@ -2,6 +2,7 @@
   "name": "backend",
   "module": "src/index.ts",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "prisma generate && tsdown",
     "start": "bun --env-file=.env --env-file=.env.production dist/index.mjs",
